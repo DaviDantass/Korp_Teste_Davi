@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Korp.StockService.Repositories;
 
-public sealed class ProductRepository(AppDbContext dbContext) : IProductRepository
+public sealed class ProductRepository(AppDbContext dbContext)
 {
     public async Task AddAsync(
         Product product,

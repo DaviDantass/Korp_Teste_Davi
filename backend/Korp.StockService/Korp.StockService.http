@@ -1,6 +1,17 @@
 @Korp.StockService_HostAddress = http://localhost:5189
 
-GET {{Korp.StockService_HostAddress}}/weatherforecast/
+GET {{Korp.StockService_HostAddress}}/api/products
 Accept: application/json
+
+###
+
+POST {{Korp.StockService_HostAddress}}/api/products
+Content-Type: application/json
+
+{
+  "code": "TECLADO-001",
+  "description": "Teclado mecânico",
+  "initialStock": 10
+}
 
 ###

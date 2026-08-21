@@ -1,5 +1,7 @@
 using Korp.StockService.Data;
 using Korp.StockService.Repositories;
+using Korp.StockService.Services;
+using Korp.StockService.Middleware;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,11 +17,13 @@ var stockDatabaseConnection = builder.Configuration
     ?? throw new InvalidOperationException(
         "Connection string 'StockDatabase' was not configured.");
 
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(stockDatabaseConnection));
-builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(stockDatabaseConnection));
+builder.Services.AddScoped<ProductRepository>();
+builder.Services.AddScoped<ProductService>();
 
 var app = builder.Build();
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
