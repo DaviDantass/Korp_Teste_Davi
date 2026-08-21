@@ -571,6 +571,11 @@ obj/
 .history
 .ionide
 
+# Local environment variables
+.env
+.env.*
+!.env.example
+
 ### VisualStudio ###
 
 # User-specific files
