@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Korp.BillingService.Repositories;
 using Korp.BillingService.Services;
 using Korp.BillingService.Middleware;
+using Korp.BillingService.Clients;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +15,11 @@ builder.Services.AddHealthChecks();
 builder.Services.AddOpenApi();
 builder.Services.AddScoped<InvoiceRepository>();
 builder.Services.AddScoped<InvoiceService>();
+builder.Services.AddHttpClient<StockServiceClient>(client =>
+  {
+      client.BaseAddress = new Uri("http://localhost:5189");
+      client.Timeout = TimeSpan.FromSeconds(5);
+  });
 
 var billingDatabaseConnection = builder.Configuration
     .GetConnectionString("BillingDatabase")

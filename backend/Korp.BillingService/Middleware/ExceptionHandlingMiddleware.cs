@@ -28,6 +28,9 @@ public sealed class ExceptionHandlingMiddleware(
                     (StatusCodes.Status404NotFound, "Nota fiscal não encontrada"),
                 ArgumentException =>
                     (StatusCodes.Status400BadRequest, "Dados inválidos"),
+                StockServiceUnavailableException =>
+                    (StatusCodes.Status503ServiceUnavailable,
+                     "Serviço de estoque indisponível"),
                 InvalidOperationException =>
                     (StatusCodes.Status409Conflict, "Operação não permitida"),
                 _ =>
