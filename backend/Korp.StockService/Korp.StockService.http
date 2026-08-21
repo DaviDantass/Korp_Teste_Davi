@@ -1,0 +1,6 @@
+@Korp.StockService_HostAddress = http://localhost:5189
+
+GET {{Korp.StockService_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
