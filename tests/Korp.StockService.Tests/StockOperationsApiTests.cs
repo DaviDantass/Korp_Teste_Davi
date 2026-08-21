@@ -86,6 +86,25 @@ public sealed class StockOperationsApiTests : IClassFixture<ProductsApiFactory>
     }
 
     [Fact]
+    public async Task WithdrawMany_WithSameKeyAndDifferentRequest_ShouldReturnConflict()
+    {
+        var product = await CreateProductAsync(10);
+        var key = $"different-request-{Guid.NewGuid():N}";
+
+        var firstResponse = await WithdrawAsync(
+            key,
+            new StockWithdrawalItemRequest(product.Id, 2));
+
+        var secondResponse = await WithdrawAsync(
+            key,
+            new StockWithdrawalItemRequest(product.Id, 3));
+
+        Assert.Equal(HttpStatusCode.OK, firstResponse.StatusCode);
+        Assert.Equal(HttpStatusCode.Conflict, secondResponse.StatusCode);
+        Assert.Equal(8, (await GetProductAsync(product.Id)).Stock);
+    }
+
+    [Fact]
     public async Task ConcurrentWithdrawals_ShouldNotProduceNegativeStock()
     {
         var product = await CreateProductAsync(10);
