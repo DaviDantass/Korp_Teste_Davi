@@ -1,0 +1,9 @@
+<header class="app-header">
+  <a class="brand" routerLink="/">Korp <span>Operação</span></a>
+  <nav aria-label="Navegação principal">
+    <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a>
+    <a routerLink="/products" routerLinkActive="active">Produtos</a>
+    <a routerLink="/invoices" routerLinkActive="active">Notas fiscais</a>
+  </nav>
+</header>
+<main class="app-content"><router-outlet /></main>
