@@ -50,4 +50,20 @@ public sealed class InvoicesController(
             id,
             cancellationToken));
     }
+    
+    [HttpPost("{id:guid}/close")]
+    [ProducesResponseType(
+      typeof(InvoiceResponse),
+      StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
+    public async Task<ActionResult<InvoiceResponse>> Close(
+      Guid id,
+      CancellationToken cancellationToken)
+    {
+        return Ok(await invoiceService.CloseAsync(
+            id,
+            cancellationToken));
+    }
 }
