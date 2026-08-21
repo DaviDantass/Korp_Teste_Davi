@@ -1,0 +1,6 @@
+@Korp.BillingService_HostAddress = http://localhost:5073
+
+GET {{Korp.BillingService_HostAddress}}/health
+Accept: application/json
+
+###

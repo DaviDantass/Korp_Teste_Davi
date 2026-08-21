@@ -62,7 +62,7 @@ public sealed class ProductsApiTests : IClassFixture<ProductsApiFactory>
         var created = await CreateProductAsync(initialStock: 10);
 
         var response = await client.PostAsJsonAsync(
-            $"/api/products/{created.Id}/stock-out",
+            $"/api/stock/{created.Id}/stock-out",
             new StockMovementRequest(4));
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -79,7 +79,7 @@ public sealed class ProductsApiTests : IClassFixture<ProductsApiFactory>
         var created = await CreateProductAsync(initialStock: 2);
 
         var response = await client.PostAsJsonAsync(
-            $"/api/products/{created.Id}/stock-out",
+            $"/api/stock/{created.Id}/stock-out",
             new StockMovementRequest(3));
 
         Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
@@ -92,7 +92,7 @@ public sealed class ProductsApiTests : IClassFixture<ProductsApiFactory>
         var created = await CreateProductAsync(initialStock: 2);
 
         var response = await client.PostAsJsonAsync(
-            $"/api/products/{created.Id}/stock-in",
+            $"/api/stock/{created.Id}/stock-in",
             new StockMovementRequest(0));
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);

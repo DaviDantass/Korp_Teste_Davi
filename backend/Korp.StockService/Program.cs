@@ -9,6 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
+builder.Services.AddHealthChecks();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
@@ -19,7 +20,9 @@ var stockDatabaseConnection = builder.Configuration
 
 builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(stockDatabaseConnection));
 builder.Services.AddScoped<ProductRepository>();
+builder.Services.AddScoped<StockOperationRepository>();
 builder.Services.AddScoped<ProductService>();
+builder.Services.AddScoped<StockOperationsService>();
 
 var app = builder.Build();
 
@@ -34,6 +37,7 @@ if (app.Environment.IsDevelopment())
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHealthChecks("/health");
 
 app.Run();
 

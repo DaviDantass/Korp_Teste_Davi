@@ -9,7 +9,6 @@ namespace Korp.StockService.Controllers;
 public sealed class ProductsController(ProductService productService) : ControllerBase
 {
     [HttpPost]
-    [ProducesResponseType(typeof(ProductResponse), StatusCodes.Status201Created)]
     public async Task<ActionResult<ProductResponse>> Create(CreateProductRequest request, CancellationToken cancellationToken)
     {
         var response = await productService.CreateAsync(request, cancellationToken);
@@ -17,52 +16,14 @@ public sealed class ProductsController(ProductService productService) : Controll
     }
 
     [HttpGet]
-    [ProducesResponseType(typeof(IReadOnlyList<ProductResponse>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<IReadOnlyList<ProductResponse>>> List(CancellationToken cancellationToken)
-    {
-        return Ok(await productService.ListAsync(cancellationToken));
-    }
+    public async Task<ActionResult<IReadOnlyList<ProductResponse>>> List(CancellationToken cancellationToken) =>
+        Ok(await productService.ListAsync(cancellationToken));
 
     [HttpGet("{id:guid}")]
-    [ProducesResponseType(typeof(ProductResponse), StatusCodes.Status200OK)]
-    public async Task<ActionResult<ProductResponse>> GetById(Guid id, CancellationToken cancellationToken)
-    {
-        return Ok(await productService.GetByIdAsync(id, cancellationToken));
-    }
+    public async Task<ActionResult<ProductResponse>> GetById(Guid id, CancellationToken cancellationToken) =>
+        Ok(await productService.GetByIdAsync(id, cancellationToken));
 
     [HttpPut("{id:guid}")]
-    [ProducesResponseType(typeof(ProductResponse), StatusCodes.Status200OK)]
-    public async Task<ActionResult<ProductResponse>> Update(Guid id, UpdateProductRequest request, CancellationToken cancellationToken)
-    {
-        return Ok(await productService.UpdateAsync(id, request, cancellationToken));
-    }
-
-    [HttpPost("{id:guid}/stock-in")]
-    [ProducesResponseType(typeof(ProductResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<ProductResponse>> AddStock(
-      Guid id,
-      StockMovementRequest request,
-      CancellationToken cancellationToken)
-    {
-        return Ok(await productService.AddStockAsync(
-            id,
-            request,
-            cancellationToken));
-    }
-    [HttpPost("{id:guid}/stock-out")]
-    [ProducesResponseType(typeof(ProductResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status409Conflict)]
-    public async Task<ActionResult<ProductResponse>> WithdrawStock(
-      Guid id,
-      StockMovementRequest request,
-      CancellationToken cancellationToken)
-    {
-        return Ok(await productService.WithdrawStockAsync(
-            id,
-            request,
-            cancellationToken));
-
-    }
+    public async Task<ActionResult<ProductResponse>> Update(Guid id, UpdateProductRequest request, CancellationToken cancellationToken) =>
+        Ok(await productService.UpdateAsync(id, request, cancellationToken));
 }
