@@ -1,0 +1,11 @@
+.git
+.vs
+.codex
+.agents
+.env
+**/bin
+**/obj
+**/TestResults
+tests
+frontend
+README.md

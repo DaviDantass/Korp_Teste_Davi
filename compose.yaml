@@ -35,6 +35,41 @@ services:
       timeout: 5s
       retries: 10
 
+  stock-api:
+    build:
+      context: .
+      dockerfile: backend/Korp.StockService/Dockerfile
+    container_name: korp-stock-api
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_HTTP_PORTS: 8080
+      ConnectionStrings__StockDatabase: Host=stock-db;Port=5432;Database=${STOCK_DB_NAME};Username=${STOCK_DB_USER};Password=${STOCK_DB_PASSWORD}
+    ports:
+      - "5189:8080"
+    depends_on:
+      stock-db:
+        condition: service_healthy
+
+  billing-api:
+    build:
+      context: .
+      dockerfile: backend/Korp.BillingService/Dockerfile
+    container_name: korp-billing-api
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_HTTP_PORTS: 8080
+      ConnectionStrings__BillingDatabase: Host=billing-db;Port=5432;Database=${BILLING_DB_NAME};Username=${BILLING_DB_USER};Password=${BILLING_DB_PASSWORD}
+      StockService__BaseUrl: http://stock-api:8080
+    ports:
+      - "5073:8080"
+    depends_on:
+      billing-db:
+        condition: service_healthy
+      stock-api:
+        condition: service_started
+
 volumes:
   stock-db-data:
   billing-db-data:

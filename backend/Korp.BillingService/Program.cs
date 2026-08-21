@@ -18,10 +18,14 @@ builder.Services.AddOpenApi();
 builder.Services.AddScoped<InvoiceRepository>();
 builder.Services.AddScoped<InvoiceService>();
 builder.Services.AddHttpClient<StockServiceClient>(client =>
-  {
-      client.BaseAddress = new Uri("http://localhost:5189");
-      client.Timeout = TimeSpan.FromSeconds(5);
-  });
+{
+    var stockServiceUrl = builder.Configuration["StockService:BaseUrl"]
+        ?? throw new InvalidOperationException(
+            "A URL do StockService não foi configurada.");
+
+    client.BaseAddress = new Uri(stockServiceUrl);
+    client.Timeout = TimeSpan.FromSeconds(5);
+});
 
 var billingDatabaseConnection = builder.Configuration
     .GetConnectionString("BillingDatabase")
@@ -32,6 +36,12 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(billingDatabaseConnection));
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    dbContext.Database.Migrate();
+}
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
