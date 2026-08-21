@@ -36,4 +36,33 @@ public sealed class ProductsController(ProductService productService) : Controll
     {
         return Ok(await productService.UpdateAsync(id, request, cancellationToken));
     }
+
+    [HttpPost("{id:guid}/stock-in")]
+    [ProducesResponseType(typeof(ProductResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ProductResponse>> AddStock(
+      Guid id,
+      StockMovementRequest request,
+      CancellationToken cancellationToken)
+    {
+        return Ok(await productService.AddStockAsync(
+            id,
+            request,
+            cancellationToken));
+    }
+    [HttpPost("{id:guid}/stock-out")]
+    [ProducesResponseType(typeof(ProductResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<ActionResult<ProductResponse>> WithdrawStock(
+      Guid id,
+      StockMovementRequest request,
+      CancellationToken cancellationToken)
+    {
+        return Ok(await productService.WithdrawStockAsync(
+            id,
+            request,
+            cancellationToken));
+
+    }
 }

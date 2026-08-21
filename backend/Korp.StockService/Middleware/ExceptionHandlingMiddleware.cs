@@ -1,9 +1,12 @@
+using System.Text.Json;
 using Korp.StockService.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Korp.StockService.Middleware;
 
-public sealed class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<ExceptionHandlingMiddleware> logger)
+public sealed class ExceptionHandlingMiddleware(
+    RequestDelegate next,
+    ILogger<ExceptionHandlingMiddleware> logger)
 {
     public async Task InvokeAsync(HttpContext context)
     {
@@ -13,31 +16,51 @@ public sealed class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Ex
         }
         catch (Exception exception)
         {
-            logger.LogError(exception, "Unhandled exception while processing {Method} {Path}", context.Request.Method, context.Request.Path);
+            logger.LogError(
+                exception,
+                "Unhandled exception while processing {Method} {Path}",
+                context.Request.Method,
+                context.Request.Path);
+
             await WriteProblemDetailsAsync(context, exception);
         }
     }
 
-    private static async Task WriteProblemDetailsAsync(HttpContext context, Exception exception)
+    private static async Task WriteProblemDetailsAsync(
+        HttpContext context,
+        Exception exception)
     {
         var (status, title) = exception switch
         {
-            ProductNotFoundException => (404, "Produto não encontrado"),
-            ProductAlreadyExistsException => (409, "Produto duplicado"),
-            ArgumentException => (400, "Dados inválidos"),
-            InvalidOperationException => (409, "Operação não permitida"),
-            _ => (500, "Erro interno")
+            ProductNotFoundException =>
+                (StatusCodes.Status404NotFound, "Produto não encontrado"),
+            ProductAlreadyExistsException =>
+                (StatusCodes.Status409Conflict, "Produto duplicado"),
+            InsufficientStockException =>
+                (StatusCodes.Status409Conflict, "Saldo insuficiente"),
+            ArgumentException =>
+                (StatusCodes.Status400BadRequest, "Dados inválidos"),
+            InvalidOperationException =>
+                (StatusCodes.Status409Conflict, "Operação não permitida"),
+            _ =>
+                (StatusCodes.Status500InternalServerError, "Erro interno")
         };
 
         context.Response.StatusCode = status;
         context.Response.ContentType = "application/problem+json";
 
-        await context.Response.WriteAsJsonAsync(new ProblemDetails
+        var problem = new ProblemDetails
         {
             Status = status,
             Title = title,
-            Detail = status == 500 ? "Ocorreu um erro inesperado." : exception.Message,
+            Detail = status == StatusCodes.Status500InternalServerError
+                ? "Ocorreu um erro inesperado no processamento da requisição."
+                : exception.Message,
             Instance = context.Request.Path
-        });
+        };
+
+        await context.Response.WriteAsync(
+            JsonSerializer.Serialize(problem),
+            context.RequestAborted);
     }
 }

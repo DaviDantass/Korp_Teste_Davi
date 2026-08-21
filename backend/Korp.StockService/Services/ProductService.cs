@@ -64,6 +64,53 @@ public sealed class ProductService(ProductRepository productRepository)
         return ToResponse(product);
     }
 
+    public async Task<ProductResponse> AddStockAsync(
+        Guid productId,
+        StockMovementRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        var product = await productRepository.GetByIdAsync(
+          productId,
+          cancellationToken)
+          ?? throw new ProductNotFoundException(productId);
+
+        product.AddStock(request.Quantity);
+
+        await productRepository.SaveChangesAsync(cancellationToken);
+
+        return ToResponse(product);
+    }
+
+    public async Task<ProductResponse> WithdrawStockAsync(
+     Guid productId,
+     StockMovementRequest request,
+     CancellationToken cancellationToken = default)
+    {
+        var product = await productRepository.GetByIdAsync(
+            productId,
+            cancellationToken)
+            ?? throw new ProductNotFoundException(productId);
+
+        var withdrawn = await productRepository.TryWithdrawStockAsync(
+            productId,
+            request.Quantity,
+            cancellationToken);
+
+        if (!withdrawn)
+        {
+            throw new InsufficientStockException(
+                productId,
+                request.Quantity);
+        }
+
+        var updatedProduct = await productRepository.GetByIdAsNoTrackingAsync(
+            productId,
+            cancellationToken)
+            ?? throw new ProductNotFoundException(productId);
+
+        return ToResponse(updatedProduct);
+    }
+
     private static ProductResponse ToResponse(Product product)
     {
         return new ProductResponse(

@@ -21,6 +21,15 @@ public sealed class ProductRepository(AppDbContext dbContext)
             .FirstOrDefaultAsync(product => product.Id == id, cancellationToken);
     }
 
+    public Task<Product?> GetByIdAsNoTrackingAsync(
+        Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        return dbContext.Products
+            .AsNoTracking()
+            .FirstOrDefaultAsync(product => product.Id == id, cancellationToken);
+    }
+
     public Task<Product?> GetByCodeAsync(
         string code,
         CancellationToken cancellationToken = default)
