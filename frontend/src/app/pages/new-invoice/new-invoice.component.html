@@ -1,0 +1,27 @@
+<section class="page"><a class="back" routerLink="/invoices">← Voltar para
+        notas</a><div class="heading"><div><p
+                class="eyebrow">Faturamento</p><h1>Nova nota fiscal</h1><p
+                class="intro">Adicione os produtos e quantidades da
+                nota.</p></div></div>@if (loading()) { <p
+        class="state">Carregando produtos...</p> } @else { <div
+        class="add-line"><label>Produto<select name="product"
+                [(ngModel)]="selectedProductId"><option value>Selecione um
+                    produto</option>@for (product of products(); track
+                product.id) { <option [value]="product.id">{{ product.code }} —
+                    {{ product.description }} (saldo: {{ product.stock
+                    }})</option> }</select></label><label>Quantidade<input
+                name="quantity" type="number" min="1"
+                [(ngModel)]="quantity"></label><button class="secondary"
+            type="button" (click)="addItem()">Adicionar item</button></div><div
+        class="panel"><h2>Itens da nota</h2>@if (items().length === 0) { <p
+            class="state">Nenhum item adicionado.</p> } @else {
+        <table><thead><tr><th>Produto</th><th>Quantidade</th><th></th></tr></thead><tbody>@for
+                (item of items(); track item.product.id) { <tr><td>{{
+                        item.product.description }}</td><td>{{ item.quantity
+                        }}</td><td><button class="link" type="button"
+                            (click)="removeItem(item.product.id)">Remover</button></td></tr>
+                }</tbody></table> }</div>@if (error()) { <p class="error">{{
+        error() }}</p> }<div class="actions"><button class="primary"
+            type="button" (click)="createInvoice()" [disabled]="saving()">{{
+            saving() ? 'Criando...' : 'Criar nota fiscal' }}</button></div>
+    }</section>
