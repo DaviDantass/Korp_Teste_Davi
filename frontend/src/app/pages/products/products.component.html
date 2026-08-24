@@ -1,28 +1,55 @@
 <section class="page">
   <div class="page-heading">
-    <div><p class="eyebrow">Operacao</p><h1>Produtos</h1><p class="intro">Produtos cadastrados no estoque.</p></div>
+    <div>
+      <p class="eyebrow">Operacao</p>
+      <h1>Produtos</h1>
+      <p class="intro">Produtos cadastrados no estoque.</p>
+    </div>
     <button class="primary" type="button" (click)="openCreate()">Novo produto</button>
   </div>
 
   <form class="search-bar" (ngSubmit)="searchProducts()">
-    <input name="search" [(ngModel)]="search" placeholder="Buscar por codigo ou descricao" aria-label="Buscar produtos">
+    <input
+      name="search"
+      [(ngModel)]="search"
+      placeholder="Buscar por codigo ou descricao"
+      aria-label="Buscar produtos"
+    />
     <button class="secondary" type="submit">Buscar</button>
   </form>
 
   @if (loading()) {
     <p class="state">Carregando produtos...</p>
   } @else if (error() && products().length === 0) {
-    <p class="state error">{{ error() }} <button type="button" (click)="loadProducts()">Tentar novamente</button></p>
+    <p class="state error">
+      {{ error() }} <button type="button" (click)="loadProducts()">Tentar novamente</button>
+    </p>
   } @else if (products().length === 0) {
     <p class="state">Nenhum produto encontrado.</p>
   } @else {
     <table>
-      <thead><tr><th>Codigo</th><th>Descricao</th><th>Saldo</th><th>Acoes</th></tr></thead>
+      <thead>
+        <tr>
+          <th>Codigo</th>
+          <th>Descricao</th>
+          <th>Saldo</th>
+          <th>Acoes</th>
+        </tr>
+      </thead>
       <tbody>
         @for (product of products(); track product.id) {
           <tr>
-            <td>{{ product.code }}</td><td>{{ product.description }}</td><td>{{ product.stock }}</td>
-            <td><button class="link-button" type="button" (click)="openEdit(product)">Editar</button><button class="link-button" type="button" (click)="openMovement(product, 'in')">Entrada</button><button class="link-button" type="button" (click)="openMovement(product, 'out')">Baixa</button></td>
+            <td>{{ product.code }}</td>
+            <td>{{ product.description }}</td>
+            <td>{{ product.stock }}</td>
+            <td>
+              <button class="link-button" type="button" (click)="openEdit(product)">Editar</button
+              ><button class="link-button" type="button" (click)="openMovement(product, 'in')">
+                Entrada</button
+              ><button class="link-button" type="button" (click)="openMovement(product, 'out')">
+                Baixa
+              </button>
+            </td>
           </tr>
         }
       </tbody>
@@ -32,11 +59,85 @@
   @if (!loading() && totalItems() > 0) {
     <nav class="pagination" aria-label="Paginacao de produtos">
       <span>{{ totalItems() }} produto(s) · pagina {{ page() }} de {{ totalPages() }}</span>
-      <button type="button" class="secondary" (click)="previousPage()" [disabled]="page() === 1">Anterior</button>
-      <button type="button" class="secondary" (click)="nextPage()" [disabled]="page() === totalPages()">Proxima</button>
+      <button type="button" class="secondary" (click)="previousPage()" [disabled]="page() === 1">
+        Anterior
+      </button>
+      <button
+        type="button"
+        class="secondary"
+        (click)="nextPage()"
+        [disabled]="page() === totalPages()"
+      >
+        Proxima
+      </button>
     </nav>
   }
 </section>
 
-@if (formOpen() || editing()) { <div class="backdrop" (click)="closeForms()"><section class="dialog" role="dialog" (click)="$event.stopPropagation()"><div class="dialog-heading"><h2>{{ editing() ? 'Editar produto' : 'Novo produto' }}</h2><button type="button" class="close" (click)="closeForms()">x</button></div><form (ngSubmit)="save()">@if (!editing()) { <label>Codigo<input name="code" [(ngModel)]="code" required maxlength="50"></label> }<label>Descricao<input name="description" [(ngModel)]="description" required maxlength="200"></label>@if (!editing()) { <label>Saldo inicial<input name="initialStock" [(ngModel)]="initialStock" type="number" min="0" required></label> }@if (error()) { <p class="form-error">{{ error() }}</p> }<div class="actions"><button type="button" class="secondary" (click)="closeForms()">Cancelar</button><button type="submit" class="primary" [disabled]="saving()">{{ saving() ? 'Salvando...' : 'Salvar' }}</button></div></form></section></div> }
-@if (movement()) { <div class="backdrop" (click)="closeMovement()"><section class="dialog" role="dialog" (click)="$event.stopPropagation()"><div class="dialog-heading"><h2>{{ movement() === 'in' ? 'Entrada de estoque' : 'Baixa de estoque' }}</h2><button type="button" class="close" (click)="closeMovement()">x</button></div><p>{{ editing()?.description }}</p><form (ngSubmit)="saveMovement()"><label>Quantidade<input name="movementQuantity" [(ngModel)]="initialStock" type="number" min="1" required></label>@if (error()) { <p class="form-error">{{ error() }}</p> }<div class="actions"><button type="button" class="secondary" (click)="closeMovement()">Cancelar</button><button type="submit" class="primary" [disabled]="saving()">{{ saving() ? 'Processando...' : 'Confirmar' }}</button></div></form></section></div> }
+@if (formOpen() || editing()) {
+  <div class="backdrop" (click)="closeForms()">
+    <section class="dialog" role="dialog" (click)="$event.stopPropagation()">
+      <div class="dialog-heading">
+        <h2>{{ editing() ? 'Editar produto' : 'Novo produto' }}</h2>
+        <button type="button" class="close" (click)="closeForms()">x</button>
+      </div>
+      <form (ngSubmit)="save()">
+        @if (!editing()) {
+          <label>Codigo<input name="code" [(ngModel)]="code" required maxlength="50" /></label>
+        }
+        <label
+          >Descricao<input name="description" [(ngModel)]="description" required maxlength="200"
+        /></label>
+        @if (!editing()) {
+          <label
+            >Saldo inicial<input
+              name="initialStock"
+              [(ngModel)]="initialStock"
+              type="number"
+              min="0"
+              required
+          /></label>
+        }
+        @if (error()) {
+          <p class="form-error">{{ error() }}</p>
+        }
+        <div class="actions">
+          <button type="button" class="secondary" (click)="closeForms()">Cancelar</button
+          ><button type="submit" class="primary" [disabled]="saving()">
+            {{ saving() ? 'Salvando...' : 'Salvar' }}
+          </button>
+        </div>
+      </form>
+    </section>
+  </div>
+}
+@if (movement()) {
+  <div class="backdrop" (click)="closeMovement()">
+    <section class="dialog" role="dialog" (click)="$event.stopPropagation()">
+      <div class="dialog-heading">
+        <h2>{{ movement() === 'in' ? 'Entrada de estoque' : 'Baixa de estoque' }}</h2>
+        <button type="button" class="close" (click)="closeMovement()">x</button>
+      </div>
+      <p>{{ editing()?.description }}</p>
+      <form (ngSubmit)="saveMovement()">
+        <label
+          >Quantidade<input
+            name="movementQuantity"
+            [(ngModel)]="initialStock"
+            type="number"
+            min="1"
+            required
+        /></label>
+        @if (error()) {
+          <p class="form-error">{{ error() }}</p>
+        }
+        <div class="actions">
+          <button type="button" class="secondary" (click)="closeMovement()">Cancelar</button
+          ><button type="submit" class="primary" [disabled]="saving()">
+            {{ saving() ? 'Processando...' : 'Confirmar' }}
+          </button>
+        </div>
+      </form>
+    </section>
+  </div>
+}

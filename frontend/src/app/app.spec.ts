@@ -8,8 +8,7 @@ describe('App', () => {
     await TestBed.configureTestingModule({
       imports: [App],
       providers: [provideRouter(routes)],
-    })
-      .compileComponents();
+    }).compileComponents();
   });
 
   it('should create the app', () => {

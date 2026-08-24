@@ -1,156 +1,156 @@
 .page {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 56px 32px
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 56px 32px;
 }
 
 .back {
-    color: #285b34;
-    text-decoration: none;
-    font-size: 12px
+  color: #285b34;
+  text-decoration: none;
+  font-size: 12px;
 }
 
 .heading {
-    border-bottom: 1px solid #dfe8e0;
-    padding: 32px 0 24px
+  border-bottom: 1px solid #dfe8e0;
+  padding: 32px 0 24px;
 }
 
 .eyebrow {
-    color: #285b34;
-    font-size: 11px;
-    letter-spacing: .15em;
-    text-transform: uppercase;
-    font-weight: 700
+  color: #285b34;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  font-weight: 700;
 }
 
 .heading h1 {
-    font-size: 46px;
-    letter-spacing: -.06em;
-    margin: 10px 0
+  font-size: 46px;
+  letter-spacing: -0.06em;
+  margin: 10px 0;
 }
 
 .intro {
-    color: #607064
+  color: #607064;
 }
 
 .add-line {
-    display: flex;
-    align-items: end;
-    gap: 12px;
-    padding: 25px 0
+  display: flex;
+  align-items: end;
+  gap: 12px;
+  padding: 25px 0;
 }
 
 .add-line label {
-    display: grid;
-    gap: 6px;
-    color: #315b3c;
-    font-weight: 700;
-    font-size: 12px
+  display: grid;
+  gap: 6px;
+  color: #315b3c;
+  font-weight: 700;
+  font-size: 12px;
 }
 
 .add-line label:first-child {
-    flex: 1
+  flex: 1;
 }
 
 .add-line select,
 .add-line input {
-    border: 1px solid #b9c8bb;
-    background: #fff;
-    padding: 11px;
-    min-width: 0
+  border: 1px solid #b9c8bb;
+  background: #fff;
+  padding: 11px;
+  min-width: 0;
 }
 
 .secondary,
 .primary {
-    border: 0;
-    padding: 12px 16px;
-    cursor: pointer
+  border: 0;
+  padding: 12px 16px;
+  cursor: pointer;
 }
 
 .secondary {
-    background: #fff;
-    border: 1px solid #b9c8bb;
-    color: #285b34
+  background: #fff;
+  border: 1px solid #b9c8bb;
+  color: #285b34;
 }
 
 .primary {
-    background: #214f2d;
-    color: #fff
+  background: #214f2d;
+  color: #fff;
 }
 
 .primary:disabled {
-    opacity: .6
+  opacity: 0.6;
 }
 
 .panel {
-    border-top: 2px solid #214f2d;
-    background: #fff;
-    padding: 22px
+  border-top: 2px solid #214f2d;
+  background: #fff;
+  padding: 22px;
 }
 
 .panel h2 {
-    font-size: 18px;
-    margin: 0 0 14px
+  font-size: 18px;
+  margin: 0 0 14px;
 }
 
 table {
-    width: 100%;
-    border-collapse: collapse
+  width: 100%;
+  border-collapse: collapse;
 }
 
 th,
 td {
-    text-align: left;
-    padding: 14px;
-    border-bottom: 1px solid #dfe8e0;
-    font-size: 13px
+  text-align: left;
+  padding: 14px;
+  border-bottom: 1px solid #dfe8e0;
+  font-size: 13px;
 }
 
 th {
-    color: #718075;
-    font-size: 10px;
-    text-transform: uppercase
+  color: #718075;
+  font-size: 10px;
+  text-transform: uppercase;
 }
 
 .link {
-    border: 0;
-    background: transparent;
-    color: #a24539;
-    text-decoration: underline;
-    cursor: pointer
+  border: 0;
+  background: transparent;
+  color: #a24539;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 .state {
-    color: #607064;
-    padding: 24px 0
+  color: #607064;
+  padding: 24px 0;
 }
 
 .error {
-    color: #a24539;
-    margin-top: 18px
+  color: #a24539;
+  margin-top: 18px;
 }
 
 .actions {
-    display: flex;
-    justify-content: end;
-    margin-top: 20px
+  display: flex;
+  justify-content: end;
+  margin-top: 20px;
 }
 
-@media(max-width:650px) {
-    .page {
-        padding: 40px 18px
-    }
+@media (max-width: 650px) {
+  .page {
+    padding: 40px 18px;
+  }
 
-    .add-line {
-        display: grid;
-        grid-template-columns: 1fr 100px
-    }
+  .add-line {
+    display: grid;
+    grid-template-columns: 1fr 100px;
+  }
 
-    .add-line .secondary {
-        grid-column: 1/-1
-    }
+  .add-line .secondary {
+    grid-column: 1/-1;
+  }
 
-    .add-line label:first-child {
-        grid-column: 1/-1
-    }
+  .add-line label:first-child {
+    grid-column: 1/-1;
+  }
 }

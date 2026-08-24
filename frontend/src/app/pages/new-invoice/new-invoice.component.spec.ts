@@ -10,7 +10,11 @@ describe('NewInvoiceComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [NewInvoiceComponent],
-      providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([{ path: 'invoices/:id', redirectTo: '' }])],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideRouter([{ path: 'invoices/:id', redirectTo: '' }]),
+      ],
     });
     http = TestBed.inject(HttpTestingController);
   });
@@ -20,7 +24,15 @@ describe('NewInvoiceComponent', () => {
   function createComponent() {
     const fixture = TestBed.createComponent(NewInvoiceComponent);
     fixture.detectChanges();
-    http.expectOne('/api/products?page=1&pageSize=100').flush({ items: [{ id: 'p1', code: 'P-1', description: 'Produto 1', stock: 5 }], page: 1, pageSize: 100, totalItems: 1, totalPages: 1 });
+    http
+      .expectOne('/api/products?page=1&pageSize=100')
+      .flush({
+        items: [{ id: 'p1', code: 'P-1', description: 'Produto 1', stock: 5 }],
+        page: 1,
+        pageSize: 100,
+        totalItems: 1,
+        totalPages: 1,
+      });
     fixture.detectChanges();
     return fixture;
   }
@@ -46,7 +58,14 @@ describe('NewInvoiceComponent', () => {
     const request = http.expectOne('/billing-api/invoices');
     expect(request.request.method).toBe('POST');
     expect(request.request.body).toEqual({ items: [{ productId: 'p1', quantity: 2 }] });
-    request.flush({ id: 'invoice-1', number: 1, status: 1, createdAt: new Date().toISOString(), closedAt: null, items: [] });
+    request.flush({
+      id: 'invoice-1',
+      number: 1,
+      status: 1,
+      createdAt: new Date().toISOString(),
+      closedAt: null,
+      items: [],
+    });
   });
 
   it('does not submit an empty invoice', () => {
