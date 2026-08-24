@@ -20,7 +20,7 @@ describe('NewInvoiceComponent', () => {
   function createComponent() {
     const fixture = TestBed.createComponent(NewInvoiceComponent);
     fixture.detectChanges();
-    http.expectOne('/api/products').flush([{ id: 'p1', code: 'P-1', description: 'Produto 1', stock: 5 }]);
+    http.expectOne('/api/products?page=1&pageSize=100').flush({ items: [{ id: 'p1', code: 'P-1', description: 'Produto 1', stock: 5 }], page: 1, pageSize: 100, totalItems: 1, totalPages: 1 });
     fixture.detectChanges();
     return fixture;
   }

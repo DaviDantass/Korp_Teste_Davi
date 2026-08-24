@@ -15,6 +15,10 @@ export class ProductsComponent implements OnInit {
   protected readonly loading = signal(true);
   protected readonly saving = signal(false);
   protected readonly error = signal('');
+  protected readonly page = signal(1);
+  protected readonly totalPages = signal(1);
+  protected readonly totalItems = signal(0);
+  protected search = '';
   protected readonly formOpen = signal(false);
   protected readonly editing = signal<Product | null>(null);
   protected readonly movement = signal<'in' | 'out' | null>(null);
@@ -26,11 +30,14 @@ export class ProductsComponent implements OnInit {
 
   protected loadProducts(): void {
     this.loading.set(true); this.error.set('');
-    this.stockService.listProducts().subscribe({
-      next: products => { this.products.set(products); this.loading.set(false); },
+    this.stockService.listProducts(this.page(), 10, this.search).subscribe({
+      next: result => { this.products.set(result.items); this.totalPages.set(result.totalPages); this.totalItems.set(result.totalItems); this.loading.set(false); },
       error: () => { this.error.set('Não foi possível carregar os produtos.'); this.loading.set(false); },
     });
   }
+  protected searchProducts(): void { this.page.set(1); this.loadProducts(); }
+  protected previousPage(): void { if (this.page() > 1) { this.page.update(value => value - 1); this.loadProducts(); } }
+  protected nextPage(): void { if (this.page() < this.totalPages()) { this.page.update(value => value + 1); this.loadProducts(); } }
 
   protected openCreate(): void { this.code = ''; this.description = ''; this.initialStock = 0; this.error.set(''); this.formOpen.set(true); }
   protected openEdit(product: Product): void { this.editing.set(product); this.description = product.description; this.error.set(''); }

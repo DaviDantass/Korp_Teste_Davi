@@ -19,10 +19,21 @@ public sealed class ProductService(ProductRepository productRepository)
         return ToResponse(product);
     }
 
-    public async Task<IReadOnlyList<ProductResponse>> ListAsync(CancellationToken cancellationToken = default)
+    public async Task<PagedProductsResponse> ListAsync(
+        int page,
+        int pageSize,
+        string? search,
+        CancellationToken cancellationToken = default)
     {
-        var products = await productRepository.ListAsync(cancellationToken);
-        return products.Select(ToResponse).ToList();
+        page = Math.Max(page, 1);
+        pageSize = Math.Clamp(pageSize, 1, 100);
+        var result = await productRepository.ListAsync(page, pageSize, search, cancellationToken);
+        return new PagedProductsResponse(
+            result.Items.Select(ToResponse).ToList(),
+            page,
+            pageSize,
+            result.TotalItems,
+            (int)Math.Ceiling(result.TotalItems / (double)pageSize));
     }
 
     public async Task<ProductResponse> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)

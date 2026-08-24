@@ -758,3 +758,6 @@ obj/
 # Additional files built by Visual Studio
 
 # End of https://www.toptal.com/developers/gitignore/api/csharp,dotnetcore,aspnetcore,angular,visualstudiocode,visualstudio
+
+# Personal study notes (do not publish)
+/LEARN.md

@@ -15,14 +15,19 @@ export class InvoicesComponent implements OnInit {
   protected readonly invoices = signal<Invoice[]>([]);
   protected readonly loading = signal(true);
   protected readonly error = signal('');
+  protected readonly page = signal(1);
+  protected readonly totalPages = signal(1);
+  protected readonly totalItems = signal(0);
 
   ngOnInit(): void { this.loadInvoices(); }
   protected loadInvoices(): void {
     this.loading.set(true); this.error.set('');
-    this.billingService.listInvoices().subscribe({
-      next: invoices => { this.invoices.set(invoices); this.loading.set(false); },
+    this.billingService.listInvoices(this.page(), 10).subscribe({
+      next: result => { this.invoices.set(result.items); this.totalPages.set(result.totalPages); this.totalItems.set(result.totalItems); this.loading.set(false); },
       error: () => { this.error.set('Não foi possível carregar as notas fiscais.'); this.loading.set(false); },
     });
   }
+  protected previousPage(): void { if (this.page() > 1) { this.page.update(value => value - 1); this.loadInvoices(); } }
+  protected nextPage(): void { if (this.page() < this.totalPages()) { this.page.update(value => value + 1); this.loadInvoices(); } }
   protected statusLabel(status: InvoiceStatus): string { return status === 'Closed' || status === 1 ? 'Fechada' : 'Aberta'; }
 }

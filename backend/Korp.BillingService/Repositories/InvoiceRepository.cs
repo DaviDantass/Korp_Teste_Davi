@@ -22,14 +22,22 @@ public sealed class InvoiceRepository(AppDbContext dbContext)
                 invoice => invoice.Id == id,
                 cancellationToken);
     }
-    public async Task<IReadOnlyList<Invoice>> ListAsync(
+    public async Task<(IReadOnlyList<Invoice> Items, int TotalItems)> ListAsync(
+        int page,
+        int pageSize,
         CancellationToken cancellationToken = default)
     {
-        return await dbContext.Invoices
+        var query = dbContext.Invoices;
+        var totalItems = await query.CountAsync(cancellationToken);
+        var items = await query
             .AsNoTracking()
             .Include(invoice => invoice.Items)
             .OrderByDescending(invoice => invoice.Number)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .ToListAsync(cancellationToken);
+
+        return (items, totalItems);
     }
 
     public Task SaveChangesAsync(

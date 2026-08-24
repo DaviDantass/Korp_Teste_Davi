@@ -26,11 +26,20 @@ public sealed class InvoiceService(
         return ToResponse(invoice);
     }
 
-    public async Task<IReadOnlyList<InvoiceResponse>> ListAsync(
+    public async Task<PagedInvoicesResponse> ListAsync(
+        int page,
+        int pageSize,
         CancellationToken cancellationToken = default)
     {
-        var invoices = await invoiceRepository.ListAsync(cancellationToken);
-        return invoices.Select(ToResponse).ToList();
+        page = Math.Max(page, 1);
+        pageSize = Math.Clamp(pageSize, 1, 100);
+        var result = await invoiceRepository.ListAsync(page, pageSize, cancellationToken);
+        return new PagedInvoicesResponse(
+            result.Items.Select(ToResponse).ToList(),
+            page,
+            pageSize,
+            result.TotalItems,
+            (int)Math.Ceiling(result.TotalItems / (double)pageSize));
     }
 
     public async Task<InvoiceResponse> GetByIdAsync(

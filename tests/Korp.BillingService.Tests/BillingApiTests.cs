@@ -59,6 +59,25 @@ public sealed class BillingApiTests
         Assert.Null(current.ClosedAt);
     }
 
+    [Fact]
+    public async Task ListInvoices_ShouldReturnPagedResults()
+    {
+        using var factory = new BillingApiFactory(HttpStatusCode.OK);
+        using var client = factory.CreateClient();
+        await CreateInvoiceAsync(client);
+        await CreateInvoiceAsync(client);
+
+        var response = await client.GetAsync("/api/invoices?page=1&pageSize=1");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var page = await response.Content.ReadFromJsonAsync<PagedInvoicesResponse>();
+        Assert.NotNull(page);
+        Assert.Equal(1, page.Page);
+        Assert.Equal(1, page.PageSize);
+        Assert.True(page.TotalItems >= 2);
+        Assert.Single(page.Items);
+    }
+
     private static async Task<InvoiceResponse> CreateInvoiceAsync(
         HttpClient client)
     {

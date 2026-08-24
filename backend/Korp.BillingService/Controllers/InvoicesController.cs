@@ -28,13 +28,13 @@ public sealed class InvoicesController(
     }
 
     [HttpGet]
-    [ProducesResponseType(
-        typeof(IReadOnlyList<InvoiceResponse>),
-        StatusCodes.Status200OK)]
-    public async Task<ActionResult<IReadOnlyList<InvoiceResponse>>> List(
-        CancellationToken cancellationToken)
+    [ProducesResponseType(typeof(PagedInvoicesResponse), StatusCodes.Status200OK)]
+    public async Task<ActionResult<PagedInvoicesResponse>> List(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20,
+        CancellationToken cancellationToken = default)
     {
-        return Ok(await invoiceService.ListAsync(cancellationToken));
+        return Ok(await invoiceService.ListAsync(page, pageSize, cancellationToken));
     }
 
     [HttpGet("{id:guid}")]

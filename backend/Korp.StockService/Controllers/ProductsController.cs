@@ -16,8 +16,12 @@ public sealed class ProductsController(ProductService productService) : Controll
     }
 
     [HttpGet]
-    public async Task<ActionResult<IReadOnlyList<ProductResponse>>> List(CancellationToken cancellationToken) =>
-        Ok(await productService.ListAsync(cancellationToken));
+    public async Task<ActionResult<PagedProductsResponse>> List(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20,
+        [FromQuery] string? search = null,
+        CancellationToken cancellationToken = default) =>
+        Ok(await productService.ListAsync(page, pageSize, search, cancellationToken));
 
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<ProductResponse>> GetById(Guid id, CancellationToken cancellationToken) =>

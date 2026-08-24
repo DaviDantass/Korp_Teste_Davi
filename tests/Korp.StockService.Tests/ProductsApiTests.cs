@@ -57,6 +57,23 @@ public sealed class ProductsApiTests : IClassFixture<ProductsApiFactory>
     }
 
     [Fact]
+    public async Task ListProducts_ShouldReturnPagedAndFilteredResults()
+    {
+        var created = await CreateProductAsync(initialStock: 4);
+
+        var response = await client.GetAsync($"/api/products?page=1&pageSize=1&search={created.Code}");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var page = await response.Content.ReadFromJsonAsync<PagedProductsResponse>();
+        Assert.NotNull(page);
+        Assert.Equal(1, page.Page);
+        Assert.Equal(1, page.PageSize);
+        Assert.Equal(1, page.TotalItems);
+        Assert.Single(page.Items);
+        Assert.Equal(created.Code, page.Items[0].Code);
+    }
+
+    [Fact]
     public async Task StockOut_WithEnoughStock_ShouldUpdateBalance()
     {
         var created = await CreateProductAsync(initialStock: 10);

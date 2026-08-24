@@ -42,13 +42,29 @@ public sealed class ProductRepository(AppDbContext dbContext)
                 cancellationToken);
     }
 
-    public async Task<IReadOnlyList<Product>> ListAsync(
+    public async Task<(IReadOnlyList<Product> Items, int TotalItems)> ListAsync(
+        int page,
+        int pageSize,
+        string? search,
         CancellationToken cancellationToken = default)
     {
-        return await dbContext.Products
+        var query = dbContext.Products.AsNoTracking();
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var term = search.Trim();
+            query = query.Where(product =>
+                product.Code.Contains(term) || product.Description.Contains(term));
+        }
+
+        var totalItems = await query.CountAsync(cancellationToken);
+        var items = await query
             .AsNoTracking()
             .OrderBy(product => product.Code)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .ToListAsync(cancellationToken);
+
+        return (items, totalItems);
     }
 
     public async Task<bool> TryWithdrawStockAsync(

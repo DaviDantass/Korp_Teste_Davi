@@ -27,7 +27,7 @@ export class NewInvoiceComponent implements OnInit {
 
   ngOnInit(): void {
     this.stockService.listProducts().subscribe({
-      next: products => { this.products.set(products); this.loading.set(false); },
+      next: result => { this.products.set(result.items); this.loading.set(false); },
       error: () => { this.error.set('Não foi possível carregar os produtos.'); this.loading.set(false); },
     });
   }
