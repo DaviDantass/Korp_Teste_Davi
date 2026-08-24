@@ -31,7 +31,7 @@ export class InvoiceDetailComponent implements OnInit {
     });
   }
 
-  protected statusLabel(status: InvoiceStatus): string { return status === 'Closed' || status === 1 ? 'Fechada' : 'Aberta'; }
+  protected statusLabel(status: InvoiceStatus): string { return status === 'Closed' || status === 2 ? 'Fechada' : 'Aberta'; }
   protected isOpen(status: InvoiceStatus): boolean { return status === 'Open' || status === 1; }
   protected productLabel(productId: string): string {
     const product = this.products().find(item => item.id === productId);

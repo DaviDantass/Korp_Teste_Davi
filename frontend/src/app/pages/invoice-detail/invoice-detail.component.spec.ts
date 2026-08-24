@@ -27,4 +27,11 @@ describe('InvoiceDetailComponent', () => {
     expect(component.invoice().status).toBe(1);
     expect(component.error()).toContain('indisponível');
   });
+
+  it('renders numeric Open status as Aberta', () => {
+    const fixture = createComponent();
+    const component = fixture.componentInstance as any;
+    expect(component.statusLabel(1)).toBe('Aberta');
+    expect(component.statusLabel(2)).toBe('Fechada');
+  });
 });

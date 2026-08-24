@@ -29,5 +29,5 @@ export class InvoicesComponent implements OnInit {
   }
   protected previousPage(): void { if (this.page() > 1) { this.page.update(value => value - 1); this.loadInvoices(); } }
   protected nextPage(): void { if (this.page() < this.totalPages()) { this.page.update(value => value + 1); this.loadInvoices(); } }
-  protected statusLabel(status: InvoiceStatus): string { return status === 'Closed' || status === 1 ? 'Fechada' : 'Aberta'; }
+  protected statusLabel(status: InvoiceStatus): string { return status === 'Closed' || status === 2 ? 'Fechada' : 'Aberta'; }
 }

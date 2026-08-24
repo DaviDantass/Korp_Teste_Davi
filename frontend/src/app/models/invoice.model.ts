@@ -1,4 +1,4 @@
-export type InvoiceStatus = 'Open' | 'Closed' | 0 | 1;
+export type InvoiceStatus = 'Open' | 'Closed' | 0 | 1 | 2;
 
 export interface InvoiceItem {
   productId: string;

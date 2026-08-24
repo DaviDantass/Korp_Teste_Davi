@@ -1,4 +1,14 @@
-<section class="page"><div class="page-heading"><div><p class="eyebrow">Faturamento</p><h1>Notas fiscais</h1><p class="intro">Notas fiscais emitidas no sistema.</p></div><a class="primary" routerLink="/invoices/new">Nova nota</a></div>
-  @if (loading()) { <p class="state">Carregando notas fiscais...</p> } @else if (error()) { <p class="state error">{{ error() }} <button type="button" (click)="loadInvoices()">Tentar novamente</button></p> } @else if (invoices().length === 0) { <p class="state">Nenhuma nota fiscal cadastrada.</p> } @else { <table><thead><tr><th>Número</th><th>Status</th><th>Criação</th><th>Itens</th><th></th></tr></thead><tbody>@for (invoice of invoices(); track invoice.id) { <tr><td><strong>#{{ invoice.number }}</strong></td><td><span class="status">{{ statusLabel(invoice.status) }}</span></td><td>{{ invoice.createdAt | date:'dd/MM/yyyy HH:mm' }}</td><td>{{ invoice.items.length }}</td><td><a class="link" [routerLink]="['/invoices', invoice.id]">Detalhes</a></td></tr> }</tbody></table> }
+<section class="page">
+  <div class="page-heading"><div><p class="eyebrow">Faturamento</p><h1>Notas fiscais</h1><p class="intro">Notas fiscais emitidas no sistema.</p></div><a class="primary" routerLink="/invoices/new">Nova nota</a></div>
+  @if (loading()) { <p class="state">Carregando notas fiscais...</p> }
+  @else if (error()) { <p class="state error">{{ error() }} <button type="button" (click)="loadInvoices()">Tentar novamente</button></p> }
+  @else if (invoices().length === 0) { <p class="state">Nenhuma nota fiscal cadastrada.</p> }
+  @else {
+    <table><thead><tr><th>Numero</th><th>Status</th><th>Criacao</th><th>Itens</th><th></th></tr></thead><tbody>
+      @for (invoice of invoices(); track invoice.id) { <tr><td><strong>#{{ invoice.number }}</strong></td><td><span class="status">{{ statusLabel(invoice.status) }}</span></td><td>{{ invoice.createdAt | date:'dd/MM/yyyy HH:mm' }}</td><td>{{ invoice.items.length }}</td><td><a class="link" [routerLink]="['/invoices', invoice.id]">Detalhes</a></td></tr> }
+    </tbody></table>
+  }
+  @if (!loading() && totalItems() > 0) {
+    <nav class="pagination" aria-label="Paginacao de notas fiscais"><span>{{ totalItems() }} nota(s) · pagina {{ page() }} de {{ totalPages() }}</span><button type="button" class="secondary" (click)="previousPage()" [disabled]="page() === 1">Anterior</button><button type="button" class="secondary" (click)="nextPage()" [disabled]="page() === totalPages()">Proxima</button></nav>
+  }
 </section>
-@if (!loading() && totalItems() > 0) { <nav class="pagination" aria-label="Paginação de notas fiscais"><span>{{ totalItems() }} nota(s) · página {{ page() }} de {{ totalPages() }}</span><button type="button" class="secondary" (click)="previousPage()" [disabled]="page() === 1">Anterior</button><button type="button" class="secondary" (click)="nextPage()" [disabled]="page() === totalPages()">Próxima</button></nav> }

@@ -22,6 +22,6 @@
                             (click)="removeItem(item.product.id)">Remover</button></td></tr>
                 }</tbody></table> }</div>@if (error()) { <p class="error">{{
         error() }}</p> }<div class="actions"><button class="primary"
-            type="button" (click)="createInvoice()" [disabled]="saving()">{{
+            type="button" (click)="createInvoice()" [disabled]="saving() || items().length === 0">{{
             saving() ? 'Criando...' : 'Criar nota fiscal' }}</button></div>
     }</section>
