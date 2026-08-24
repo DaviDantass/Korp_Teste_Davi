@@ -1,53 +1,67 @@
 # Korp — Sistema de emissão de notas fiscais
 
-Sistema web desenvolvido para o desafio técnico da Korp. A aplicação permite cadastrar produtos, controlar saldos de estoque e emitir notas fiscais com múltiplos itens.
+Aplicação web para cadastro de produtos, controle de estoque e emissão de notas fiscais. O sistema foi construído com Angular no frontend e dois serviços independentes em ASP.NET Core, com persistência em PostgreSQL.
 
 ## Visão geral
 
-O projeto usa uma arquitetura de microsserviços:
+O sistema é dividido por responsabilidade:
 
-- **StockService**: responsável por produtos, saldos, entradas e baixas;
-- **BillingService**: responsável por notas fiscais, itens, numeração e fechamento;
-- **Angular**: interface para cadastro, consulta e demonstração do fluxo;
-- **PostgreSQL**: persistência real, com um banco por microsserviço;
-- **Docker Compose**: execução local dos serviços e bancos.
-
-No fechamento, o fluxo é:
+- **StockService** mantém produtos, códigos, descrições e saldos;
+- **BillingService** mantém notas fiscais, itens, numeração e status;
+- o frontend Angular apresenta os fluxos e consome as APIs;
+- cada serviço possui seu próprio banco PostgreSQL.
 
 ```text
-Angular -> BillingService -> StockService -> PostgreSQL de estoque
-                                      |
-                                      v
-                         baixa confirmada ou erro 503
-                                      |
-                                      v
-                           Billing fecha ou mantém Open
+Angular ──> StockService ──> stock-db
+       └─> BillingService ─> billing-db
+
+Fechamento de nota:
+Angular ──> BillingService ──> StockService
+                              ├─ baixa confirmada: nota Closed
+                              └─ falha: nota continua Open
 ```
 
-A nota nasce Aberta. Ela só passa a Fechada depois que todos os itens são baixados com sucesso no StockService.
+A separação dos bancos evita que um serviço dependa diretamente das tabelas do outro. A comunicação entre os serviços acontece por HTTP.
 
 ## Funcionalidades
 
-- Home com navegação para os fluxos principais;
-- Produtos: listagem paginada, busca por código/descrição, cadastro, edição, entrada e baixa;
-- Notas fiscais: listagem paginada e consulta de detalhes;
-- Nova nota: seleção de vários produtos, quantidades e inclusão/remoção de itens;
-- Fechamento/impressão: loading, baixa de estoque e mudança para Fechada;
-- Tratamento de falha: retorno 503, mensagem amigável e nota preservada como Aberta;
-- Baixa atômica, baixa em lote transacional, concorrência sem saldo negativo e idempotência.
+### Produtos
+
+- listagem paginada;
+- busca por código ou descrição;
+- cadastro com saldo inicial;
+- edição da descrição;
+- entrada de estoque;
+- baixa manual de estoque.
+
+### Notas fiscais
+
+- criação de uma nota com vários produtos;
+- controle de quantidade por item;
+- numeração sequencial;
+- status `Open` (Aberta) e `Closed` (Fechada);
+- listagem paginada;
+- consulta dos detalhes.
+
+### Fechamento
+
+Uma nota é criada como Aberta. Ao solicitar o fechamento, o BillingService verifica o status, envia os itens ao StockService e aguarda a confirmação da baixa. A nota só é salva como Fechada após essa confirmação.
+
+Se o StockService estiver indisponível, o BillingService retorna `503 Service Unavailable` e a nota permanece Aberta. O frontend mostra o estado de processamento e uma mensagem compreensível para o usuário.
 
 ## Tecnologias
 
 ### Frontend
 
-- Angular 22 standalone;
+- Angular 22 com standalone components;
 - TypeScript;
 - Angular Router;
 - RxJS e `HttpClient`;
-- FormsModule com `ngModel`;
+- `FormsModule` com `ngModel`;
+- signals para estado reativo;
 - HTML semântico e SCSS próprio.
 
-O projeto não utiliza Angular Material. Os componentes visuais foram feitos com HTML e SCSS para manter a interface simples e alinhada ao escopo.
+Os componentes visuais não dependem de Angular Material. A interface usa HTML e SCSS para manter o layout leve e consistente.
 
 ### Backend
 
@@ -56,55 +70,112 @@ O projeto não utiliza Angular Material. Os componentes visuais foram feitos com
 - Entity Framework Core;
 - Npgsql;
 - PostgreSQL;
-- LINQ para filtros, ordenação e paginação;
-- xUnit para testes.
+- LINQ;
+- xUnit.
 
 ### Infraestrutura
 
 - Docker Compose;
-- Migrations automáticas na inicialização;
-- PostgreSQL separado para StockService e BillingService.
+- migrations do EF Core executadas na inicialização;
+- banco independente para cada serviço.
 
-## Como executar
+## Decisões técnicas
 
-### 1. Pré-requisitos
+### Responsabilidade no fechamento
 
+O BillingService é o dono da nota e conhece seus itens. Por isso, o frontend chama apenas o endpoint de fechamento do BillingService. O BillingService solicita a baixa ao StockService e só então altera o status da nota.
+
+### Numeração
+
+A numeração da nota é gerada por uma sequence do PostgreSQL. O frontend não calcula números, evitando colisões quando mais de uma nota é criada ao mesmo tempo.
+
+### Baixa de estoque
+
+A baixa verifica se o saldo é suficiente antes de subtrair a quantidade. A atualização é condicional e o banco possui uma restrição que impede saldo negativo.
+
+Quando a nota possui vários produtos, a baixa é executada em uma transação. Se qualquer item falhar, o lote inteiro é revertido.
+
+Também existe controle de concorrência para o caso de duas baixas disputarem o último saldo e idempotência com `IdempotencyKey` e `RequestHash` para evitar efeitos duplicados em requisições repetidas.
+
+### Paginação
+
+A paginação ocorre no backend. Os endpoints recebem `page` e `pageSize`; o repositório usa LINQ/EF Core com `Count`, `Skip` e `Take`. A resposta inclui os itens e os metadados da página. O frontend apenas solicita a página e exibe os controles de navegação.
+
+### Erros
+
+Cada API possui um middleware global que transforma erros de validação, domínio e infraestrutura em `ProblemDetails`. Isso mantém o formato das respostas consistente. O frontend interpreta o erro e preserva o estado correto da tela.
+
+## API
+
+### StockService — `http://localhost:5189`
+
+| Método | Rota | Descrição |
+|---|---|---|
+| `GET` | `/api/products?page=1&pageSize=10&search=term` | Lista e filtra produtos |
+| `POST` | `/api/products` | Cadastra um produto |
+| `GET` | `/api/products/{id}` | Consulta um produto |
+| `PUT` | `/api/products/{id}` | Atualiza a descrição |
+| `POST` | `/api/stock/{id}/stock-in` | Registra entrada |
+| `POST` | `/api/stock/{id}/stock-out` | Registra baixa manual |
+| `POST` | `/api/stock/withdraw` | Executa baixa em lote |
+| `GET` | `/health` | Verifica a saúde do serviço |
+
+### BillingService — `http://localhost:5073`
+
+| Método | Rota | Descrição |
+|---|---|---|
+| `GET` | `/api/invoices?page=1&pageSize=10` | Lista notas |
+| `POST` | `/api/invoices` | Cria uma nota Aberta |
+| `GET` | `/api/invoices/{id}` | Consulta uma nota e seus itens |
+| `POST` | `/api/invoices/{id}/close` | Solicita baixa e fechamento |
+| `GET` | `/health` | Verifica a saúde do serviço |
+
+As listagens retornam uma estrutura com `items`, `page`, `pageSize`, `totalItems` e `totalPages`.
+
+## Estrutura do projeto
+
+```text
+backend/
+  Korp.StockService/       # produtos e estoque
+  Korp.BillingService/     # notas fiscais
+frontend/                  # aplicação Angular
+tests/
+  Korp.StockService.Tests/
+  Korp.BillingService.Tests/
+compose.yaml               # APIs e bancos
+.env.example               # configuração local
+```
+
+No frontend, as telas ficam em `src/app/pages`, os contratos em `src/app/models` e as integrações HTTP em `src/app/services`.
+
+## Executando localmente
+
+### Pré-requisitos
+
+- Docker Desktop com Docker Compose;
 - .NET SDK 10;
-- Node.js e npm;
-- Docker Desktop com Docker Compose.
+- Node.js e npm.
 
-### 2. Configurar variáveis
+### Backend e bancos
 
 Na raiz do projeto:
 
 ```powershell
 Copy-Item .env.example .env
-```
-
-Os valores padrão usam PostgreSQL nas portas `5433` e `5434`.
-
-### 3. Subir backend e bancos
-
-```powershell
 docker compose up -d --build
 docker compose ps
 ```
 
-As APIs ficam disponíveis em:
+Portas padrão:
 
-| Serviço | URL |
-|---|---|
-| StockService | `http://localhost:5189` |
-| BillingService | `http://localhost:5073` |
-| Stock PostgreSQL | `localhost:5433` |
-| Billing PostgreSQL | `localhost:5434` |
+| Recurso | Porta |
+|---|---:|
+| Stock API | `5189` |
+| Billing API | `5073` |
+| Stock PostgreSQL | `5433` |
+| Billing PostgreSQL | `5434` |
 
-Health checks:
-
-- `http://localhost:5189/health`;
-- `http://localhost:5073/health`.
-
-### 4. Executar frontend
+### Frontend
 
 ```powershell
 cd frontend
@@ -112,84 +183,38 @@ npm install
 npm start
 ```
 
-Abra `http://localhost:4200`. O proxy Angular encaminha `/api` para o StockService e `/billing-api` para o BillingService.
+Acesse `http://localhost:4200`. O proxy do Angular encaminha `/api` para o StockService e `/billing-api` para o BillingService.
 
-## Comandos de validação
+## Testes e build
 
-Na raiz:
+Backend, na raiz:
 
 ```powershell
 dotnet build Korp.sln --no-restore
 dotnet test Korp.sln --no-build
 ```
 
-No frontend:
+Frontend, dentro de `frontend`:
 
 ```powershell
-cd frontend
 npm.cmd test -- --watch=false
 npm.cmd run build
 ```
 
-Os testes frontend usam Vitest e `HttpTestingController`. O modo `--browsers=ChromeHeadless` não está configurado neste projeto Angular 22 e exige um provider de browser adicional.
+Os testes frontend usam Vitest e `HttpTestingController` para verificar chamadas HTTP, payloads, estados de loading, sucesso e falha. Os testes backend cobrem domínio, APIs, integração, concorrência e comunicação com o StockService.
 
-## Cenário de falha para demonstração
+## Parando e recuperando um serviço
 
-Com os containers em execução:
+Para simular a indisponibilidade do estoque:
 
 ```powershell
 docker compose stop stock-api
 ```
 
-Tente fechar uma nota Aberta pela interface. O BillingService retorna `503 Service Unavailable`, a interface informa a indisponibilidade e a nota continua Aberta.
-
-Depois recupere o serviço:
+Depois de testar o comportamento de erro, recupere o serviço:
 
 ```powershell
 docker compose start stock-api
 ```
 
-Ao tentar novamente, a baixa é confirmada e a nota pode ser fechada.
-
-## Endpoints principais
-
-### StockService
-
-| Método | Rota | Finalidade |
-|---|---|---|
-| GET | `/api/products?page=1&pageSize=10&search=termo` | Produtos paginados e filtrados |
-| POST | `/api/products` | Cadastro de produto |
-| GET | `/api/products/{id}` | Consulta de produto |
-| PUT | `/api/products/{id}` | Edição de produto |
-| POST | `/api/stock/{id}/stock-in` | Entrada de estoque |
-| POST | `/api/stock/{id}/stock-out` | Baixa manual |
-| POST | `/api/stock/withdraw` | Baixa em lote usada no fechamento |
-
-### BillingService
-
-| Método | Rota | Finalidade |
-|---|---|---|
-| GET | `/api/invoices?page=1&pageSize=10` | Notas paginadas |
-| POST | `/api/invoices` | Criação de nota Aberta |
-| GET | `/api/invoices/{id}` | Detalhes da nota |
-| POST | `/api/invoices/{id}/close` | Baixa e fechamento condicionado ao sucesso |
-
-## Documentação adicional
-
-- [Documentação técnica completa](docs/TECHNICAL_DOCUMENTATION.md): detalhamento exigido pelo desafio, arquitetura, endpoints, Angular, RxJS, C#, LINQ, erros, banco e evidências;
-- `LEARN.md`: roteiro pessoal de estudo e apresentação. É ignorado pelo Git e não faz parte da entrega pública.
-
-## Entrega do desafio
-
-A entrega deve incluir:
-
-1. link do repositório público `Korp_Teste_SeuNome`;
-2. link do vídeo de apresentação;
-3. detalhamento técnico.
-
-Antes do envio, substitua os links abaixo pelos links finais:
-
-- Repositório: **a preencher**;
-- Vídeo: **a preencher**.
-
-O envio deve ser feito para `rh@korp.com.br` dentro do prazo informado no desafio.
+Os dados persistem nos volumes PostgreSQL enquanto os volumes não forem removidos.

@@ -1,6 +1,6 @@
 # Frontend Angular
 
-Frontend do sistema de emissao de notas fiscais. A documentacao principal do projeto esta em [../README.md](../README.md) e o detalhamento tecnico esta em [../docs/TECHNICAL_DOCUMENTATION.md](../docs/TECHNICAL_DOCUMENTATION.md).
+Frontend do sistema de emissao de notas fiscais. A documentacao principal do projeto esta em [../README.md](../README.md).
 
 ## Executar
 
