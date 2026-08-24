@@ -1,1 +1,15 @@
-<section class="page"><a class="back" routerLink="/invoices">← Voltar para notas fiscais</a>@if (loading()) { <p class="state">Carregando nota fiscal...</p> } @else if (error() && !invoice()) { <p class="state error">{{ error() }}</p> } @else if (invoice(); as current) { <div class="heading"><div><p class="eyebrow">Detalhes da nota</p><h1>Nota #{{ current.number }}</h1><p class="date">Criada em {{ current.createdAt | date:'dd/MM/yyyy HH:mm' }}</p></div><div class="heading-actions"><span class="status">{{ statusLabel(current.status) }}</span>@if (isOpen(current.status)) { <button class="primary" type="button" (click)="closeInvoice()" [disabled]="closing()">{{ closing() ? 'Fechando...' : 'Imprimir nota' }}</button> }</div></div>@if (error()) { <p class="error">{{ error() }}</p> }<div class="panel"><h2>Itens</h2><table><thead><tr><th>Produto</th><th>Quantidade</th></tr></thead><tbody>@for (item of current.items; track item.productId) { <tr><td>{{ productLabel(item.productId) }}</td><td>{{ item.quantity }}</td></tr> }</tbody></table></div> }</section>
+<section class="page">
+  <a class="back" routerLink="/invoices">← Voltar para notas</a>
+  @if (loading()) {
+    <p class="state">Carregando nota fiscal...</p>
+  } @else if (error() && !invoice()) {
+    <p class="state error">{{ error() }}</p>
+  } @else if (invoice(); as current) {
+    <div class="heading">
+      <div><p class="eyebrow">Detalhes da nota</p><h1>Nota #{{ current.number }}</h1><p class="date">Criada em {{ current.createdAt | date:'dd/MM/yyyy HH:mm' }}</p></div>
+      <div class="heading-actions"><span class="status">{{ statusLabel(current.status) }}</span>@if (isOpen(current.status)) { <button class="primary" type="button" (click)="closeInvoice()" [disabled]="closing()">{{ closing() ? 'Fechando...' : 'Imprimir nota' }}</button> }</div>
+    </div>
+    @if (error()) { <div class="error-box"><p class="error">{{ error() }}</p><button class="secondary" type="button" (click)="closeInvoice()" [disabled]="closing()">Tentar novamente</button></div> }
+    <div class="panel"><h2>Itens</h2><table><thead><tr><th>Produto</th><th>Quantidade</th></tr></thead><tbody>@for (item of current.items; track item.productId) { <tr><td>{{ productLabel(item.productId) }}</td><td>{{ item.quantity }}</td></tr> }</tbody></table></div>
+  }
+</section>
